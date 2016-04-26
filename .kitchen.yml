@@ -20,6 +20,15 @@ platforms:
       box_url: http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-7.2_chef-provisionerless.box
     # driver_config:
     #   require_chef_omnibus: 12.4.1
+  - name:  solaris112
+    verifier:
+      name: inspec
+      format: documentation
+    driver_plugin: ssh
+    driver_config:
+      hostname: 172.29.100.225
+      username: root
+      password: alfresco1
 
 suites:
   - name: ci
@@ -145,3 +154,8 @@ suites:
         "enable_ssl_header" : false
       }
     }
+
+  - name: weblogic
+    run_list:
+        - recipe[alfresco::transformations]
+        - recipe[alfresco::weblogic]

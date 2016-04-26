@@ -1,0 +1,17 @@
+#!/usr/bin/python
+import os, sys
+readTemplate('<%= @wlserver_home %>/common/templates/wls/wls.jar')
+cd('/Server/AdminServer')
+set('ListenAddress','')
+set('ListenPort', <%= @weblogic_port %>)
+create('AdminServer','SSL')
+cd('SSL/AdminServer')
+set('Enabled', 'True')
+set('ListenPort', <%= @weblogic_ssl_port %>)
+cd('/')
+cd('Security/base_domain/User/weblogic')
+cmo.setPassword('<%= @weblogic_password %>')
+setOption('OverwriteDomain', 'true')
+writeDomain('<%= @domain_home %>')
+closeTemplate()
+exit()

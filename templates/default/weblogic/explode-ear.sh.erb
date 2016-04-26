@@ -1,0 +1,32 @@
+#!/bin/sh
+# Check if argument passed.
+if [ -z "$1" ];
+then
+ echo "No argument supplied"
+exit 1
+fi
+# Check if file exists.
+FILE=$1
+if [ ! -f $FILE ];
+then
+echo "File $FILE not found."
+exit 1
+fi
+# Remove if existing.
+rm -rf alfresco
+mkdir alfresco
+cd alfresco
+jar xvf ../$FILE
+mv alfresco.war alfresco.war.tmp
+mv share.war share.war.tmp
+mkdir alfresco.war
+mkdir share.war
+cd alfresco.war
+jar xvf ../alfresco.war.tmp
+cd ..
+rm alfresco.war.tmp
+cd share.war
+jar xvf ../share.war.tmp
+cd ..
+rm share.war.tmp
+echo "File $FILE expanded."

@@ -7,6 +7,9 @@ gem 'minitest'
 gem 'rake'
 gem 'rubocop'
 gem 'chefspec'
+gem 'kitchen-inspec'
+gem 'kitchen-ssh'
+gem 'log4r'
 
 gem 'berkshelf', '~> 4.0' # Comes with ChefDK 0.9.0
 

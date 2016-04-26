@@ -93,6 +93,7 @@ default['java']['jdk']['8']['x86_64']['url'] = 'http://download.oracle.com/otn-p
 default['java']['jdk']['8']['x86_64']['checksum'] = 'f45932f9a3a9c38e47a60504d21449f8'
 
 #3rd-party defaults
+#rhel/ubuntu
 default['alfresco']['libreoffice_version'] = "4.2.5.2"
 default['alfresco']['libre_office_name'] = "LibreOffice_#{node['alfresco']['libreoffice_version']}_Linux_x86-64_rpm"
 default['alfresco']['libre_office_tar_name'] = "#{node['alfresco']['libre_office_name']}.tar.gz"
@@ -100,6 +101,12 @@ default['alfresco']['libre_office_tar_url'] = "https://downloadarchive.documentf
 
 default['alfresco']['install_fonts'] = false
 default['alfresco']['install_swftools'] = true
+
+#solaris
+default['alfresco']['freetype'] = 'ftp://172.29.101.56/external_apps/freetype-2.5.5.tar.gz'
+default['alfresco']['jpegsrc'] = 'ftp://172.29.101.56/external_apps/jpegsrc.v9.tar.gz'
+default['alfresco']['ghostscript'] = 'ftp://172.29.101.56/external_apps/ghostscript-9.15.tar.gz'
+default['alfresco']['openOffice'] = 'ftp://172.29.101.56/external_apps/Apache_OpenOffice_incubating_3.4.0_Solaris_x86_install-arc_en-US.tar.gz'
 
 # Exclude chkfontpath due to unsatisfied dependency on xfs
 default['alfresco']['exclude_font_packages'] = "tv-fonts chkfontpath pagul-fonts\*"
