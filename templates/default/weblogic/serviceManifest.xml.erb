@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE service_bundle SYSTEM "/usr/share/lib/xml/dtd/service_bundle.dtd.1">
+<service_bundle type='manifest' name='<%= @ServiceName %>'>
+<service name='<%= @ServiceName %>' type='service' version='1'>
+
+   <dependency restart_on="none" type="service"
+       name="multi_user_dependency" grouping="require_all">
+       <service_fmri value="svc:/milestone/multi-user"/>
+   </dependency>
+
+   <exec_method
+      type='method'
+      name='start'
+      exec='<%= @StartCommand %>'
+      timeout_seconds='120'>
+      <method_context>
+        <method_credential user='oracle' group='wls' />
+      </method_context>
+   </exec_method>
+
+   <exec_method
+      type='method'
+      name='stop'
+      exec='<%= @StopCommand %>'
+      timeout_seconds='120'>
+      <method_context>
+        <method_credential user='oracle' group='wls' />
+      </method_context>
+   </exec_method>
+
+   <instance enabled="false" name="alf_domain"/>
+
+   <stability value='Unstable' />
+
+   <template>
+      <common_name>
+         <loctext xml:lang='C'><%= @ServiceName %></loctext>
+      </common_name>
+   </template>
+
+</service>
+</service_bundle>

@@ -1,0 +1,66 @@
+# Read the template to use for creating the domain
+readTemplate('<%= @WeblogicInstallPath %>/wlserver/common/templates/wls/wls.jar')
+
+# Set the listen address and listen port for the Administration Server
+cd('Servers/AdminServer')
+set('ListenAddress','<%= @serverIp %>')
+set('ListenPort', 7001)
+
+# Enable SSL on the Administration Server and set the SSL listen address and
+# port
+create('AdminServer','SSL')
+cd('SSL/AdminServer')
+set('Enabled', 'false')
+
+# Set the domain password for the WebLogic Server administration user
+cd('/')
+cd('Security/base_domain/User/weblogic')
+cmo.setPassword('<%= @DefaultPassword %>')
+
+cd('/')
+cd('NMProperties')
+set('ListenAddress','<%= @serverIp %>')
+
+# If the domain already exists, overwrite the domain
+setOption('OverwriteDomain', 'true')
+writeDomain('<%= @DomainRootPath %>/<%= @DomainName %>')
+closeTemplate()
+
+# Start server and configure AlfrescoServer properties
+startServer('AdminServer', '<%= @DomainName %>', 't3://<%= @serverIp %>:7001', 'weblogic', '<%= @DefaultPassword %>','<%= @DomainName %>', overWriteRootDir='true', block='true')
+connect('weblogic', '<%= @DefaultPassword %>', 't3://<%= @serverIp %>:7001')
+edit()
+startEdit()
+
+cmo.createServer('AlfrescoServer')
+cmo.createUnixMachine('machine-0')
+
+cd("/SecurityConfiguration/<%= @DomainName %>")
+print "setting attributes for mbean type SecurityConfiguration"
+set("NodeManagerUsername", "weblogic")
+set("NodeManagerPasswordEncrypted", "<%= @DefaultPassword %>")
+
+cd("/Machines/machine-0/NodeManager/machine-0")
+print "setting attributes for mbean type NodeManager"
+set("ListenAddress", "<%= @serverIp %>")
+
+cd("/Servers/AlfrescoServer")
+print "setting attributes for mbean type Server"
+set("ListenAddress", "<%= @serverIp %>")
+set("ListenPort", "<%= @Alfresco_port %>")
+bean = getMBean("/Machines/machine-0")
+cmo.setMachine(bean)
+
+cd("/JMX/<%= @DomainName %>")
+print "setting attributes for mbean type JMX"
+set("PlatformMBeanServerEnabled", "true")
+
+try:
+  deploy("alfresco","<%= @AlfrescoExplodedLocation %>","AlfrescoServer",securityModel="DDOnly",block="true")
+except:
+  print "Could not deploy application alfresco"
+
+save()
+activate(block="true")
+shutdown(force='true', block='true')
+exit()

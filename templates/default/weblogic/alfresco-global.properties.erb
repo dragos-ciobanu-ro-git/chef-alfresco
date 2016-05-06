@@ -1,0 +1,117 @@
+###############################
+## Common Alfresco Properties #
+## Enterprise overlay         #
+###############################
+
+dir.root=/opt/Replicate
+
+alfresco.context=alfresco
+alfresco.host=172.29.100.225
+alfresco.port=8080
+alfresco.protocol=http
+
+share.context=share
+share.host=172.29.100.225
+share.port=8080
+share.protocol=http
+
+#### database connection properties ###
+db.driver=oracle.jdbc.OracleDriver
+db.username=alfresco
+db.password=alfresco
+db.name=orcl
+db.url=jdbc:oracle:thin:@172.29.100.191:1521:orcl
+db.pool.statements.enable=false
+
+
+###Cluster configuration
+#alfresco.cluster.enabled=true
+#alfresco.cluster.name=alf51stack6
+#alfresco.cluster.interface=172.29.*.*
+
+#alfresco.hazelcast.tcp.config=<members>172.29.100.200,172.29.100.201</members>
+#alfresco.hazelcast.specify.interface=true
+#alfresco.hazelcast.bind.interface=172.29.100.200
+#alfresco.ehcache.rmi.hostname=172.29.100.200
+#alfresco.hazelcast.port=5701
+#alfresco.hazelcast.autoinc.port=false
+#alfresco.hazelcast.mancenter.enabled=true
+#alfresco.hazelcast.mancenter.url=http://172.30.40.127:8080/mancenter-2.5
+
+### Replication ###
+replication.enabled=true
+dir.remote=/opt/Replicate
+dir.contentstore=${dir.remote}/contentstore
+dir.contentstore.deleted=${dir.remote}/contentstore.deleted
+dir.auditcontentstore=${dir.remote}/audit.contentstore
+
+
+# The server mode. Set value here
+# UNKNOWN | TEST | BACKUP | PRODUCTION
+system.serverMode=UNKNOWN
+
+### FTP Server Configuration ###
+ftp.enabled=true
+ftp.port=21
+
+### RMI registry port for JMX ###
+alfresco.rmi.services.port=50500
+alfresco.rmi.services.host=172.29.100.225
+monitor.rmi.service.port=0
+
+### External executable locations ###
+ooo.exe=/opt/openoffice.org3/program/soffice
+ooo.enabled=true
+ooo.port=8100
+img.root=
+img.dyn=/opt/csw/lib
+img.exe=/opt/csw/bin/convert
+swf.exe=/usr/local/bin/pdf2swf
+swf.languagedir=
+
+jodconverter.enabled=false
+jodconverter.officeHome=
+jodconverter.portNumbers=
+
+
+### Initial admin password ###
+alfresco_user_store.adminpassword=209c6174da490caeb422f3fa5a7ae634
+
+### E-mail site invitation setting ###
+notification.email.siteinvite=true
+
+### License location ###
+dir.license.external=/export/home/oracle/alf_domain
+
+### Solr indexing ###
+index.subsystem.name=solr4
+dir.keystore=${dir.root}/keystore
+solr.host=172.29.100.191
+solr.port=8080
+#solr.port.ssl=8443
+
+### Smart Folders Config Properties ###
+smart.folders.enabled=false
+solr.secureComms=none
+
+### Remote JMX (Default: disabled) ###
+alfresco.jmx.connector.enabled=true
+
+###Authentication Oracle Directory
+#authentication.chain=alfrescoNtlm1:alfrescoNtlm
+authentication.chain=ldap1:ldap,alfrescoNtlm1:alfrescoNtlm
+ldap.authentication.active=true
+ldap.authentication.java.naming.security.authentication=simple
+ldap.authentication.allowGuestLogin=false
+ldap.authentication.userNameFormat=cn=%s,ou=People,dc=alfness,dc=com
+ldap.authentication.java.naming.provider.url=ldap://172.29.100.111:2389
+ldap.authentication.defaultAdministratorUserNames=admin
+ldap.synchronization.java.naming.security.credentials=admin
+ldap.authentication.authenticateFTP=false
+ldap.synchronization.active=true
+synchronization.import.cron=0 0 0 * * ?
+ldap.synchronization.java.naming.security.authentication=simple
+ldap.synchronization.java.naming.security.principal=cn=Directory Manager
+ldap.synchronization.java.naming.security.credentials=directory
+ldap.synchronization.groupSearchBase=ou=Groups,dc=alfness,dc=com
+ldap.synchronization.userSearchBase=ou=People,dc=alfness,dc=com
