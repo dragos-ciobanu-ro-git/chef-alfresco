@@ -3,7 +3,7 @@
 ## Enterprise overlay         #
 ###############################
 
-dir.root=/opt/Replicate
+dir.root=/export/home/oracle/Replicate
 
 alfresco.context=alfresco
 alfresco.host=172.29.100.225
@@ -19,10 +19,9 @@ share.protocol=http
 db.driver=oracle.jdbc.OracleDriver
 db.username=alfresco
 db.password=alfresco
-db.name=orcl
-db.url=jdbc:oracle:thin:@172.29.100.191:1521:orcl
+db.name=alfresco
+db.url=jdbc:oracle:thin:@172.29.100.251:1521:alfresco
 db.pool.statements.enable=false
-
 
 ###Cluster configuration
 #alfresco.cluster.enabled=true
@@ -39,12 +38,11 @@ db.pool.statements.enable=false
 #alfresco.hazelcast.mancenter.url=http://172.30.40.127:8080/mancenter-2.5
 
 ### Replication ###
-replication.enabled=true
-dir.remote=/opt/Replicate
+replication.enabled=false
+dir.remote=/export/home/oracle/Replicate
 dir.contentstore=${dir.remote}/contentstore
 dir.contentstore.deleted=${dir.remote}/contentstore.deleted
 dir.auditcontentstore=${dir.remote}/audit.contentstore
-
 
 # The server mode. Set value here
 # UNKNOWN | TEST | BACKUP | PRODUCTION
@@ -60,7 +58,7 @@ alfresco.rmi.services.host=172.29.100.225
 monitor.rmi.service.port=0
 
 ### External executable locations ###
-ooo.exe=/opt/openoffice.org3/program/soffice
+ooo.exe=/opt/openOffice/openoffice.org3/program/soffice
 ooo.enabled=true
 ooo.port=8100
 img.root=
@@ -73,7 +71,6 @@ jodconverter.enabled=false
 jodconverter.officeHome=
 jodconverter.portNumbers=
 
-
 ### Initial admin password ###
 alfresco_user_store.adminpassword=209c6174da490caeb422f3fa5a7ae634
 
@@ -84,10 +81,10 @@ notification.email.siteinvite=true
 dir.license.external=/export/home/oracle/alf_domain
 
 ### Solr indexing ###
-index.subsystem.name=solr4
-dir.keystore=${dir.root}/keystore
-solr.host=172.29.100.191
-solr.port=8080
+index.subsystem.name=noindex
+#dir.keystore=${dir.root}/keystore
+#solr.host=172.29.100.191
+#solr.port=8080
 #solr.port.ssl=8443
 
 ### Smart Folders Config Properties ###

@@ -97,20 +97,20 @@ end
 environment_setup = { PATH: "#{node['weblogic']['oracle_user_home']}/#{node['java']['java_folder']}/bin:$PATH",
                       WL_HOME: "#{node['weblogic']['oracle_user_home']}/Oracle_Home/wlserver",
                       CONFIG_JVM_ARGS: "\"-Djava.security.egd=file:/dev/./urandom\"",
-                      JAVA_HOME: "#{node['weblogic']['oracle_user_home']}/#{node['java']['java_folder']}"}
+                      JAVA_HOME: "#{node['weblogic']['oracle_user_home']}/#{node['java']['java_folder']}",
+                      PRE_CLASSPATH: "\"#{node['weblogic']['oracle_user_home']}/alf_domain\"",
+                      LD_LIBRARY_PATH: "\"#{node['weblogic']['oracle_user_home']}/alf_domain/lib\"",
+                      EXT_PRE_CLASSPATH: "\"#{node['weblogic']['oracle_user_home']}/alf_domain/lib/ojdbc7.jar\"",
+                      USER_MEM_ARGS: "\"-Xms128m -Xmx2048m -XX:CompileThreshold=8000 -XX:MaxPermSize=512m\""}
 
+domainVariables = ""
 environment_setup.each do |propName, propValue|
-  file_replace_line "replace-#{propName}-on-.profile" do
-    path "#{node['weblogic']['oracle_user_home']}/.profile"
-    replace "#{propName}="
-    with "#{propName}=#{propValue}"
-    only_if "test -f #{node['weblogic']['oracle_user_home']}/.profile"
-  end
   file_append "append #{propName} to .profile" do
     path "#{node['weblogic']['oracle_user_home']}/.profile"
     line "export #{propName}=#{propValue}"
     only_if "test -f #{node['weblogic']['oracle_user_home']}/.profile"
   end
+  domainVariables << "export #{propName}=#{propValue}\n"
 end
 
 template "#{node['weblogic']['oracle_user_home']}/oraInst.loc" do
@@ -143,7 +143,7 @@ template "#{node['weblogic']['oracle_user_home']}/config.py" do
     source 'weblogic/config.py.erb'
     variables(
       serverIp: node['ipaddress'],
-      AlfrescoExplodedLocation: '/opt/AlfrescoServer/alfresco/sample.war',
+      AlfrescoExplodedLocation: '/opt/AlfrescoServer/alfresco',
       DomainName: 'alf_domain',
       DomainRootPath: "#{node['weblogic']['oracle_user_home']}",
       NodeManagerPath: "#{node['weblogic']['oracle_user_home']}/alf_domain/nodemanager",
@@ -156,10 +156,9 @@ template "#{node['weblogic']['oracle_user_home']}/config.py" do
     mode '644'
 end
 
-directory '/opt/AlfrescoServer/alfresco' do
-  owner 'oracle'
-  group 'wls'
-  recursive true
+execute 'Create AlfrescoServer dir' do
+    command "mkdir -p /opt/AlfrescoServer/alfresco && chown -R oracle:wls /opt/AlfrescoServer"
+    user 'root'
 end
 
 remote_file "/opt/AlfrescoServer/alfresco-ear.zip" do
@@ -176,10 +175,13 @@ template "/opt/AlfrescoServer/explode-ear.sh" do
     mode '644'
 end
 
-directory "#{node['weblogic']['oracle_user_home']}/alf_domain" do
-  owner 'oracle'
-  group 'wls'
-  recursive true
+%W(#{node['weblogic']['oracle_user_home']}/alf_domain
+#{node['weblogic']['oracle_user_home']}/Replicate).each do |dir_path|
+  directory dir_path do
+    owner 'oracle'
+    group 'wls'
+    recursive true
+  end
 end
 
 template "#{node['weblogic']['oracle_user_home']}/alf_domain/alfresco-global.properties" do
@@ -189,20 +191,21 @@ template "#{node['weblogic']['oracle_user_home']}/alf_domain/alfresco-global.pro
     mode '644'
 end
 
-bash 'Move artifacts' do
+bash 'Explode-ear' do
     user 'oracle'
     group 'wls'
     cwd "/opt/AlfrescoServer/"
     code <<-EOH
   unzip alfresco-ear.zip
   rm -rf bin licenses myfaces*.zip README.txt
-  mv web-server/classpath/alfresco #{node['weblogic']['oracle_user_home']}/alf_domain/
+  export PATH=#{node['weblogic']['oracle_user_home']}/#{node['java']['java_folder']}/bin:$PATH
+  /bin/sh explode-ear.sh alfresco-*.ear
+  mkdir -p #{node['weblogic']['oracle_user_home']}/alf_domain/lib
+  cp -rf #{node['weblogic']['oracle_user_home']}/Oracle_Home/oracle_common/modules/oracle.jdbc*/ojdbc7.jar #{node['weblogic']['oracle_user_home']}/alf_domain/lib/ojdbc7.jar
+  cp -rf /opt/AlfrescoServer/web-server/classpath/alfresco #{node['weblogic']['oracle_user_home']}/alf_domain/alfresco
+  cp -rf /opt/AlfrescoServer/alf_data/keystore #{node['weblogic']['oracle_user_home']}/Replicate
   EOH
-end
-
-execute 'Explode ear' do
-    command "su - oracle -c \"cd /opt/AlfrescoServer && sh explode-ear.sh alfresco-*.ear\""
-    user 'root'
+  not_if { File.exist?("/opt/AlfrescoServer/alfresco/alfresco.war/index.jsp") }
 end
 
 execute 'Configure Alfresco Domain' do
@@ -217,6 +220,12 @@ execute 'Waiting for configuration to finish' do
   retries 30
   retry_delay 2
   returns 0
+end
+
+file_replace_line "append extra env variables to #{node['weblogic']['oracle_user_home']}/alf_domain/bin/setDomainEnv.sh" do
+  path "#{node['weblogic']['oracle_user_home']}/alf_domain/bin/setDomainEnv.sh"
+  replace "# --- End.*"
+  with domainVariables
 end
 
 #Service configuration
@@ -256,6 +265,13 @@ template "#{node['weblogic']['oracle_user_home']}/alfrescoserver-service.xml" do
     mode '644'
 end
 
+remote_file "#{node['weblogic']['oracle_user_home']}/alf_domain/lib/ojdbc7.jar" do
+  source node['weblogic']['alfresco-ear']
+  owner 'oracle'
+  group 'wls'
+  action :create_if_missing
+end
+
 bash 'Import Service configuration' do
     user 'root'
     code <<-EOH
@@ -273,9 +289,9 @@ service 'wladminserver' do
   action :start
 end
 
-execute 'Waiting for AdminServer to start' do
+execute 'Waiting for AdminServer to start and deploy console' do
   user 'root'
-  command "tail -5 /var/svc/log/wladminserver*.log | grep \"Server state changed to RUNNING.\""
+  command "curl \"http://#{node['ipaddress']}:7001/console\""
   action :run
   retries 50
   retry_delay 2
@@ -298,4 +314,13 @@ file "#{node['weblogic']['oracle_user_home']}/alf_domain/servers/AlfrescoServer/
   group 'wls'
   mode '644'
   notifies :start, 'service[wlalfrescoserver]', :immediately
+end
+
+execute 'Waiting for AlfrescoServer to start' do
+  user 'root'
+  command "curl \"http://#{node['ipaddress']}:8080/alfresco\""
+  action :run
+  retries 300
+  retry_delay 2
+  returns 0
 end

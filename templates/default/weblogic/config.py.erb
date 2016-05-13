@@ -46,7 +46,7 @@ set("ListenAddress", "<%= @serverIp %>")
 
 cd("/Servers/AlfrescoServer")
 print "setting attributes for mbean type Server"
-set("ListenAddress", "<%= @serverIp %>")
+set("ListenAddress", "")
 set("ListenPort", "<%= @Alfresco_port %>")
 bean = getMBean("/Machines/machine-0")
 cmo.setMachine(bean)
