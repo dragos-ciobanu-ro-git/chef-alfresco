@@ -3,24 +3,24 @@
 ## Enterprise overlay         #
 ###############################
 
-dir.root=/export/home/oracle/Replicate
+dir.root=<%= @dirRoot %>
 
 alfresco.context=alfresco
-alfresco.host=172.29.100.225
-alfresco.port=8080
+alfresco.host=<%= @serverIp %>
+alfresco.port=<%= @alfrescoPort %>
 alfresco.protocol=http
 
 share.context=share
-share.host=172.29.100.225
-share.port=8080
+share.host=<%= @serverIp %>
+share.port=<%= @sharePort %>
 share.protocol=http
 
 #### database connection properties ###
 db.driver=oracle.jdbc.OracleDriver
-db.username=alfresco
-db.password=alfresco
-db.name=alfresco
-db.url=jdbc:oracle:thin:@172.29.100.251:1521:alfresco
+db.username=<%= @dbUsername %>
+db.password=<%= @dbPassword %>
+db.name=<%= @dbName %>
+db.url=jdbc:oracle:thin:@<%= @dbIp %>:<%= @dbPort %>:${db.name}
 db.pool.statements.enable=false
 
 ###Cluster configuration
@@ -39,7 +39,7 @@ db.pool.statements.enable=false
 
 ### Replication ###
 replication.enabled=false
-dir.remote=/export/home/oracle/Replicate
+dir.remote=<%= @replicationDir %>
 dir.contentstore=${dir.remote}/contentstore
 dir.contentstore.deleted=${dir.remote}/contentstore.deleted
 dir.auditcontentstore=${dir.remote}/audit.contentstore
@@ -54,7 +54,7 @@ ftp.port=21
 
 ### RMI registry port for JMX ###
 alfresco.rmi.services.port=50500
-alfresco.rmi.services.host=172.29.100.225
+alfresco.rmi.services.host=<%= @serverIp %>
 monitor.rmi.service.port=0
 
 ### External executable locations ###
@@ -76,9 +76,6 @@ alfresco_user_store.adminpassword=209c6174da490caeb422f3fa5a7ae634
 
 ### E-mail site invitation setting ###
 notification.email.siteinvite=true
-
-### License location ###
-dir.license.external=/export/home/oracle/alf_domain
 
 ### Solr indexing ###
 index.subsystem.name=noindex

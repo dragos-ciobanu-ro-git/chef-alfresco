@@ -176,7 +176,8 @@ template "/opt/AlfrescoServer/explode-ear.sh" do
 end
 
 %W(#{node['weblogic']['oracle_user_home']}/alf_domain
-#{node['weblogic']['oracle_user_home']}/Replicate).each do |dir_path|
+#{node['weblogic']['oracle_user_home']}/Replicate
+#{node['weblogic']['oracle_user_home']}/alf_domain/alfresco/extension).each do |dir_path|
   directory dir_path do
     owner 'oracle'
     group 'wls'
@@ -184,8 +185,34 @@ end
   end
 end
 
+# Install license
+remote_directory "#{node['weblogic']['oracle_user_home']}/alf_domain/alfresco/extension/license" do
+  source node['alfresco']['license_source']
+  cookbook node['alfresco']['license_cookbook']
+  owner 'oracle'
+  group 'wls'
+  mode '644'
+  files_owner 'oracle'
+  files_group 'wls'
+  files_mode "644"
+  ignore_failure true
+end
+
+# TODO: Reuse curent attributes from chef alfresco
 template "#{node['weblogic']['oracle_user_home']}/alf_domain/alfresco-global.properties" do
     source 'weblogic/alfresco-global.properties.erb'
+    variables(
+      serverIp: node['ipaddress'],
+      alfrescoPort: '8080',
+      sharePort: '8080',
+      dirRoot: "#{node['weblogic']['oracle_user_home']}/Replicate",
+      replicationDir: "#{node['weblogic']['oracle_user_home']}/Replicate",
+      dbUsername: 'alfresco',
+      dbPassword: 'alfresco',
+      dbName: 'alfresco',
+      dbIp: '172.29.100.251',
+      dbPort: '1521'
+    )
     owner 'oracle'
     group 'wls'
     mode '644'
